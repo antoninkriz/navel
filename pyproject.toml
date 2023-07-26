@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "navel"
+version = "0.1.0"
+description = "Python linting through AST expressions"
+authors = ["Antonín Kříž <15214494+antoninkriz@users.noreply.github.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/antoninkriz/navel"
+repository = "https://github.com/antoninkriz/navel"
+
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pyastgrep = "^1.3.1"
+pyyaml = "^6.0"
+lxml = "^4.8"
+click = "^8.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
