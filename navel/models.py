@@ -1,16 +1,16 @@
-from typing import List
-
 import dataclasses
 import fnmatch
 import pathlib
+from typing import List, Union
 
+from navel.yaml_expr.glob import GlobExpr
 from navel.yaml_expr.yaml_expr import YamlExpr
 
 
 @dataclasses.dataclass
 class Settings:
-    included: List[str]
-    excluded: List[str]
+    included: List[Union[str, GlobExpr]]
+    excluded: List[Union[str, GlobExpr]]
     allow_ignore: bool
 
 
@@ -23,14 +23,12 @@ class Rule:
     instead: str
     settings: Settings
 
-    def match_path(self, path: pathlib.Path):
+    def match_path(self, path: pathlib.Path) -> bool:
         should_be_included = any(
-            fnmatch.fnmatch(str(path), included_pattern)
-            for included_pattern in self.settings.included
+            fnmatch.fnmatch(str(path), included_pattern.glob if isinstance(included_pattern, GlobExpr) else included_pattern) for included_pattern in self.settings.included
         )
         should_be_excluded = any(
-            fnmatch.fnmatch(str(path), excluded_pattern)
-            for excluded_pattern in self.settings.excluded
+            fnmatch.fnmatch(str(path), excluded_pattern.glob if isinstance(excluded_pattern, GlobExpr) else excluded_pattern) for excluded_pattern in self.settings.excluded
         )
         return should_be_included and not should_be_excluded
 

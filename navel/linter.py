@@ -1,16 +1,16 @@
-from typing import List, Tuple, Generator
 import pathlib
 import re
 import tokenize
+from typing import FrozenSet, Generator, List, Tuple
 
-from navel.caching.file_manager import FileManager, File
+from navel.caching.file_manager import File, FileManager
 from navel.errors import LinterError
 from navel.models import Rule
 from navel.yaml_expr.yaml_expr import YamlExpr
 
 IGNORE_COMMENTS = [
-    re.compile(r'^#\s?bb:\s?ignore$'),
-    re.compile(r'^#\s?navel:\s?ignore$'),
+    re.compile(r"^#\s?bb:\s?ignore$"),
+    re.compile(r"^#\s?navel:\s?ignore$"),
 ]
 
 
@@ -20,7 +20,7 @@ class Linter:
         self._rules: List[Rule] = rules
 
     @staticmethod
-    def _get_ignored_lines(file: File):
+    def _get_ignored_lines(file: File) -> FrozenSet[int]:
         return frozenset(
             line
             for token_type, token, (line, _), _, _ in file.tokens
@@ -28,12 +28,8 @@ class Linter:
             if any(r.search(token) for r in IGNORE_COMMENTS)
         )
 
-    def lint_file(self, path: pathlib.Path) -> Generator[Tuple[Rule, int]]:
-        matching_rules = [
-            rule
-            for rule in self._rules
-            if rule.match_path(path)
-        ]
+    def lint_file(self, path: pathlib.Path) -> Generator[Tuple[Rule, int], None, None]:
+        matching_rules = [rule for rule in self._rules if rule.match_path(path)]
         if len(matching_rules) == 0:
             return
 
@@ -42,9 +38,9 @@ class Linter:
 
         for rule in sorted(self._rules, key=lambda x: x.name):
             if not isinstance(rule.expr, YamlExpr):
-                raise LinterError(f'Rule {rule.name} is not a valid Navel rule')
+                raise LinterError(f"Rule {rule.name} is not a valid Navel rule")
 
-            matching_lines = rule.expr.match_line_numbers(file)
+            matching_lines = frozenset(rule.expr.match_line_numbers(file))
             if rule.settings.allow_ignore:
                 matching_lines -= ignored_lines
 

@@ -1,13 +1,17 @@
 import os
+import pathlib
+import re
+from typing import NoReturn
 
 import yaml
-import pathlib
 
 from navel.caching.file_manager import File
-from navel.yaml_expr.yaml_expr import YamlExpr
+from navel.errors import ExprError
+from navel.yaml_expr.yaml_expr import YamlExpr, yaml_add
 
 
-class Glob(YamlExpr):
+@yaml_add
+class GlobExpr(YamlExpr):
     """
     Construct and parse glob expressions in YAML
 
@@ -17,12 +21,22 @@ class Glob(YamlExpr):
     pathlib.Path('some/dir/*')
     """
 
+    PATTERN = re.compile(r"~\+[/\\].+")
+
     def __init__(self, loader: yaml.Loader, node: yaml.ScalarNode):
         super().__init__(loader, node)
-        self._glob = pathlib.Path(
-            os.path.dirname(loader.name),
-            loader.construct_scalar(node)[len('~+/'):]
-        )
+        val = loader.construct_scalar(node)
+        if not isinstance(val, str):
+            raise ExprError("Invalid glob")
 
-    def match_line_numbers(self, file: File):
+        self._glob = pathlib.Path(os.path.dirname(loader.name), val[len("~+/") :])
+
+    def match_line_numbers(self, file: File) -> NoReturn:
         raise NotImplementedError
+
+    def matches(self, file: File) -> NoReturn:
+        raise NotImplementedError
+
+    @property
+    def glob(self) -> pathlib.Path:
+        return self._glob

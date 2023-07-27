@@ -1,14 +1,16 @@
 import dataclasses
+from typing import Any, Dict, NoReturn, cast
 
 import yaml
 
 from navel.caching.file_manager import File
 from navel.errors import ExprError
-from navel.yaml_expr.yaml_expr import YamlExpr
 from navel.models import Settings as SettingsModel
+from navel.yaml_expr.yaml_expr import YamlExpr, yaml_add
 
 
-class Settings(YamlExpr):
+@yaml_add
+class SettingsExpr(YamlExpr):
     """
     Construct and parse glob expressions in YAML
 
@@ -18,16 +20,23 @@ class Settings(YamlExpr):
     pathlib.Path('some/dir/*')
     """
 
-    def __init__(self, loader: yaml.Loader, node: yaml.ScalarNode):
+    def __init__(self, loader: yaml.Loader, node: yaml.MappingNode):
         super().__init__(loader, node)
-        values = loader.construct_mapping(node)
+        values = cast(Dict[str, Any], loader.construct_mapping(node))
         try:
-            self.settings = SettingsModel(**values)
-        except TypeError:
+            self._settings = SettingsModel(**values)
+        except TypeError as exc:
             for field in dataclasses.fields(SettingsModel):
                 if field.name not in values:
-                    raise ExprError(f'!settings node is missing required field `{field.name}`')
+                    raise ExprError(f"!settings node is missing required field `{field.name}`") from exc
             raise
 
-    def match_line_numbers(self, file: File):
+    def match_line_numbers(self, file: File) -> NoReturn:
         raise NotImplementedError
+
+    def matches(self, file: File) -> NoReturn:
+        raise NotImplementedError
+
+    @property
+    def settings(self) -> SettingsModel:
+        return self._settings

@@ -1,15 +1,17 @@
+import re
 from typing import List
 
 import lxml.etree
-import yaml
 import pyastgrep.search
+import yaml
 
 from navel.caching.file_manager import File
 from navel.errors import ExprError
-from navel.yaml_expr.yaml_expr import YamlExpr
+from navel.yaml_expr.yaml_expr import YamlExpr, yaml_add
 
 
-class XPath(YamlExpr):
+@yaml_add
+class XPathExpr(YamlExpr):
     """
     Construct and parse XPath expressions in YAML
 
@@ -26,24 +28,29 @@ class XPath(YamlExpr):
     lxml.etree.XPath(//*)
     """
 
+    PATTERN = re.compile(r"/.+")
+
     def __init__(self, loader: yaml.Loader, node: yaml.ScalarNode):
         super().__init__(loader, node)
-        self._path = lxml.etree.XPath(
-            loader.construct_scalar(node)
-        )
+        try:
+            val = loader.construct_scalar(node)
+            if not isinstance(val, str):
+                raise ExprError("Invalid XPath")
+            self._path = lxml.etree.XPath(val)
+        except lxml.etree.XPathSyntaxError as exc:
+            raise ExprError("Invalid XPath") from exc
 
     def match_line_numbers(self, file: File) -> List[int]:
-        matching_elements = file.xml.xpath(self._path)
+        matching_elements = self._path(file.xml)
 
-        try:
-            iterator = iter(matching_elements)
-        except TypeError:
-            raise ExprError(f'Result not iterable: {matching_elements}')
+        if not isinstance(matching_elements, list):
+            raise ExprError(f"Result not iterable: {str(matching_elements)}")
+        iterator = iter(matching_elements)
 
         linenos = []
         for element in iterator:
             if not isinstance(element, lxml.etree._Element):
-                raise ExprError(f'Not an AST node: {element}')
+                raise ExprError(f"Not an AST node: {str(element)}")
 
             ast_node = file.ast_xml_mapping.get(element, None)
             if ast_node is not None:
@@ -51,3 +58,6 @@ class XPath(YamlExpr):
                 if position is not None:
                     linenos.append(position.lineno)
         return linenos
+
+    def matches(self, file: File) -> bool:
+        return bool(self._path(file.xml))

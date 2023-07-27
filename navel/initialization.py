@@ -1,5 +1,5 @@
-from typing import Iterable
 import pathlib
+from typing import Iterable
 
 INIT_TEMPLATE = '''settings:
   all_files: &all_files !settings
@@ -20,7 +20,7 @@ rules:
       """This module has a docstring."""
 '''
 
-TESTS_SETTINGS_TEMPLATE = '''
+TESTS_SETTINGS_TEMPLATE = """
   tests_only: &tests_only !settings
     included:
       {test_dirs}
@@ -35,22 +35,17 @@ TESTS_SETTINGS_TEMPLATE = '''
       {test_dirs}
       - ~+/.tox/*
     allow_ignore: yes
-'''
+"""
 
 
-def generate_config(test_directories: Iterable[pathlib.Path]):
-    test_dirs_block = '\n      '.join(
-        '- ~+/{}'.format(test_dir / '*')
-        for test_dir in test_directories
-    )
+def generate_config(test_directories: Iterable[pathlib.Path]) -> str:
+    test_dirs_block = "\n      ".join(f'- ~+/{test_dir / "*"}' for test_dir in test_directories)
     if test_dirs_block:
-        test_settings = TESTS_SETTINGS_TEMPLATE.format(
-            test_dirs=test_dirs_block
-        )
+        test_settings = TESTS_SETTINGS_TEMPLATE.format(test_dirs=test_dirs_block)
     else:
-        test_settings = ''
+        test_settings = ""
     config = INIT_TEMPLATE.format(
         test_block=test_settings,
-        default_settings='excluding_tests' if test_settings else 'all_files'
+        default_settings="excluding_tests" if test_settings else "all_files",
     )
     return config
