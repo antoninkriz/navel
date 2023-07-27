@@ -3,7 +3,7 @@ name: ci
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
       - "**"
@@ -19,7 +19,7 @@ jobs:
       matrix:
         python-version: ["3.11.4"]
         poetry-version: ["1.5.1"]
-      fail-fast: true
+      fail-fast: false
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -30,5 +30,14 @@ jobs:
           python-version: ${{ matrix.python-version }}
           poetry-version: ${{ matrix.poetry-version }}
 
-      - name: Run
-        run: poetry run pip freeze
+      - name: Black - code formatting
+        continue-on-error: true
+        run: poetry run black --check navel tests
+
+      - name: Mypy - type checking
+        continue-on-error: true
+        run: poetry run mypy navel
+
+      - name: PyLint - linter
+        continue-on-error: true
+        run: poetry run pylint navel

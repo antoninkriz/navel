@@ -194,6 +194,8 @@ def lint(
         rule = failure.rule
 
         if verbose:
+            file_name = click.style(f"{path}:{lineno}", fg="bright_magenta", bold=True)
+            rule_name = click.style(rule.name, fg="bright_magenta", bold=True, underline=True)
             example = (
                 f'{click.style("Example", bold=True)}:\n{rule.example.strip()}\n' if rule.example is not None else ""
             )
@@ -202,14 +204,13 @@ def lint(
             )
 
             click.echo(
-                textwrap.dedent(
-                    f"""
-{click.style(f"{path}:{lineno}", fg="bright_magenta", bold=True)}\t{click.style(rule.name, fg="bright_magenta", bold=True, underline=True)}
-{click.style("Description", bold=True)}: {rule.description}
-{click.style("Line", bold=True)}:
-{line}
-{example}{instead}"""
-                ).lstrip()
+                textwrap.dedent(f"""
+                    {file_name}\t{rule_name}
+                    {click.style("Description", bold=True)}: {rule.description}
+                    {click.style("Line", bold=True)}:
+                    {line}
+                    {example}{instead}
+                """).lstrip()
             )
         else:
             click.echo(f"{path}:{lineno}\t{rule.name}: {rule.description}")

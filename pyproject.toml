@@ -9,6 +9,11 @@ homepage = "https://github.com/antoninkriz/navel"
 repository = "https://github.com/antoninkriz/navel"
 
 
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
 [tool.poetry.dependencies]
 python = "^3.8"
 pyastgrep = "^1.3.1"
@@ -39,6 +44,22 @@ line-length = 120
 target-version = ['py38', 'py39', 'py310', 'py311']
 
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.pylint.main]
+extension-pkg-allow-list = ["lxml.etree"]
+jobs = 0
+
+
+[tool.pylint.classes]
+exclude-protected = [
+    "lxml.etree._Element"
+]
+
+
+[tool.pylint.messages_control]
+max-line-length = 120
+
+
+[tool.pylint.design]
+max-returns = 8
+max-locals = 20
+min-public-methods = 1
