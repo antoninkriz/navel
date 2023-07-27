@@ -31,16 +31,13 @@ jobs:
           poetry-version: ${{ matrix.poetry-version }}
 
       - name: Black - code formatting
-        continue-on-error: true
         shell: bash
         run: poetry run black --check navel tests
 
       - name: Mypy - type checking
-        continue-on-error: true
         shell: bash
         run: poetry run mypy navel
 
       - name: PyLint - linter
-        continue-on-error: true
         shell: bash
         run: poetry run pylint navel

@@ -204,13 +204,15 @@ def lint(
             )
 
             click.echo(
-                textwrap.dedent(f"""
+                textwrap.dedent(
+                    f"""
                     {file_name}\t{rule_name}
                     {click.style("Description", bold=True)}: {rule.description}
                     {click.style("Line", bold=True)}:
                     {line}
                     {example}{instead}
-                """).lstrip()
+                """
+                ).lstrip()
             )
         else:
             click.echo(f"{path}:{lineno}\t{rule.name}: {rule.description}")
