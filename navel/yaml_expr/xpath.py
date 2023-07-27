@@ -32,13 +32,16 @@ class XPathExpr(YamlExpr):
 
     def __init__(self, loader: yaml.Loader, node: yaml.ScalarNode):
         super().__init__(loader, node)
+        val = loader.construct_scalar(node)
+        if not isinstance(val, str):
+            raise ExprError("Invalid XPath")
         try:
-            val = loader.construct_scalar(node)
-            if not isinstance(val, str):
-                raise ExprError("Invalid XPath")
             self._path = lxml.etree.XPath(val)
         except lxml.etree.XPathSyntaxError as exc:
             raise ExprError("Invalid XPath") from exc
+
+    def __repr__(self) -> str:
+        return f'<{self.__class__.__name__} {self._path}>'
 
     def match_line_numbers(self, file: File) -> List[int]:
         matching_elements = self._path(file.xml)

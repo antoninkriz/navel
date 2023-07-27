@@ -31,6 +31,9 @@ class SettingsExpr(YamlExpr):
                     raise ExprError(f"!settings node is missing required field `{field.name}`") from exc
             raise
 
+    def __repr__(self) -> str:
+        return f'<{self.__class__.__name__} {self._settings}>'
+
     def match_line_numbers(self, file: File) -> NoReturn:
         raise NotImplementedError
 

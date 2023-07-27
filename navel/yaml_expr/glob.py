@@ -31,6 +31,9 @@ class GlobExpr(YamlExpr):
 
         self._glob = pathlib.Path(os.path.dirname(loader.name), val[len("~+/") :])
 
+    def __repr__(self) -> str:
+        return f'<{self.__class__.__name__} {self._glob}>'
+
     def match_line_numbers(self, file: File) -> NoReturn:
         raise NotImplementedError
 

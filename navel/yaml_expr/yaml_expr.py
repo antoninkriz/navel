@@ -15,6 +15,10 @@ class YamlExpr(abc.ABC):
         self._loader = loader
         self._node = node
 
+    @abc.abstractmethod
+    def __repr__(self) -> str:
+        return f'<{self.__class__.__name__}>'
+
     @classmethod
     def add_to_yaml(cls) -> None:
         tag = cls.TAG if cls.TAG is not None else f"!{cls.__name__.lower()[:-4]}"

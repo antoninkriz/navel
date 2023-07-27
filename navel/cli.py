@@ -91,6 +91,7 @@ def linting_failures(filepaths: List[pathlib.Path], rules: List[Rule]) -> Genera
         readable=True,
         path_type=pathlib.Path,
     ),
+    default=pathlib.Path(".")
 )
 @click.option(
     "--force",
@@ -185,9 +186,9 @@ def lint(
 
     filepaths: List[pathlib.Path] = (
         list(
-            get_git_modified(project_directory.absolute())
+            get_git_modified(project_directory)
             if modified_only
-            else walk_python_files(project_directory.absolute())
+            else walk_python_files(project_directory)
         )
         if len(files) == 0
         else [pathlib.Path(f) for f in files]
@@ -202,27 +203,26 @@ def lint(
         rule = failure.rule
 
         if verbose:
+            example = f'{click.style("Example", bold=True)}:\n{rule.example.strip()}\n' if rule.example is not None else ""
+            instead = f'{click.style("Instead", bold=True)}:\n{rule.instead.strip()}\n' if rule.instead is not None else ""
+
             click.echo(textwrap.dedent(f"""
 {click.style(f"{path}:{lineno}", fg="bright_magenta", bold=True)}\t{click.style(rule.name, fg="bright_magenta", bold=True, underline=True)}
 {click.style("Description", bold=True)}: {rule.description}
 {click.style("Line", bold=True)}:
 {line}
-{click.style("Example", bold=True)}:
-{rule.expr}
-{click.style("Instead", bold=True)}:
-{rule.instead}
-""").lstrip())
+{example}{instead}""").lstrip())
         else:
             click.echo(f"{path}:{lineno}\t{rule.name}: {rule.description}")
 
-        click.echo(
-            click.style(
-                f'Linting {"failed" if failures else "succeeded"} ('
-                f'{len(rules)} rule{"" if len(rules) == 1 else "s"},'
-                f'{len(filepaths)} file{"" if len(filepaths) == 1 else "s"},'
-                f'{failures} violation{"" if failures == 1 else "s"}'
-                f").",
-                fg="bright_green" if failures == 0 else "bright_red",
-            )
+    click.echo(
+        click.style(
+            f'Linting {"failed" if failures else "succeeded"} ('
+            f'{len(rules)} rule{"" if len(rules) == 1 else "s"}, '
+            f'{len(filepaths)} file{"" if len(filepaths) == 1 else "s"}, '
+            f'{failures} violation{"" if failures == 1 else "s"}'
+            f").",
+            fg="bright_green" if failures == 0 else "bright_red",
         )
-        sys.exit(1 if failures != 0 else 0)
+    )
+    sys.exit(1 if failures != 0 else 0)
