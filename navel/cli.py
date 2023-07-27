@@ -3,7 +3,7 @@ import pathlib
 import subprocess
 import sys
 import textwrap
-from typing import Generator, Iterable, List, Optional, Tuple
+from typing import Generator, Iterable, List, Tuple
 
 import click
 
@@ -16,7 +16,8 @@ from navel.parsing import load_config_file
 
 
 @click.group()
-def cli(): pass
+def cli() -> None:
+    pass
 
 
 def walk_python_files(root_dir: pathlib.Path) -> Iterable[pathlib.Path]:
@@ -91,7 +92,7 @@ def linting_failures(filepaths: List[pathlib.Path], rules: List[Rule]) -> Genera
         readable=True,
         path_type=pathlib.Path,
     ),
-    default=pathlib.Path(".")
+    default=pathlib.Path("."),
 )
 @click.option(
     "--force",
@@ -140,7 +141,7 @@ def init(project_directory: pathlib.Path, force: bool, bellybutton: bool) -> Non
         readable=True,
         path_type=pathlib.Path,
     ),
-    default=pathlib.Path(".")
+    default=pathlib.Path("."),
 )
 @click.option(
     "--modified-only",
@@ -155,13 +156,7 @@ def init(project_directory: pathlib.Path, force: bool, bellybutton: bool) -> Non
     is_flag=True,
     default=False,
 )
-@click.option(
-    "--files",
-    "-f",
-    help="Specifies exact files to be checked",
-    multiple=True,
-    required=False
-)
+@click.option("--files", "-f", help="Specifies exact files to be checked", multiple=True, required=False)
 def lint(
     project_directory: pathlib.Path,
     modified_only: bool,
@@ -185,11 +180,7 @@ def lint(
         ) from exc
 
     filepaths: List[pathlib.Path] = (
-        list(
-            get_git_modified(project_directory)
-            if modified_only
-            else walk_python_files(project_directory)
-        )
+        list(get_git_modified(project_directory) if modified_only else walk_python_files(project_directory))
         if len(files) == 0
         else [pathlib.Path(f) for f in files]
     )
@@ -203,15 +194,23 @@ def lint(
         rule = failure.rule
 
         if verbose:
-            example = f'{click.style("Example", bold=True)}:\n{rule.example.strip()}\n' if rule.example is not None else ""
-            instead = f'{click.style("Instead", bold=True)}:\n{rule.instead.strip()}\n' if rule.instead is not None else ""
+            example = (
+                f'{click.style("Example", bold=True)}:\n{rule.example.strip()}\n' if rule.example is not None else ""
+            )
+            instead = (
+                f'{click.style("Instead", bold=True)}:\n{rule.instead.strip()}\n' if rule.instead is not None else ""
+            )
 
-            click.echo(textwrap.dedent(f"""
+            click.echo(
+                textwrap.dedent(
+                    f"""
 {click.style(f"{path}:{lineno}", fg="bright_magenta", bold=True)}\t{click.style(rule.name, fg="bright_magenta", bold=True, underline=True)}
 {click.style("Description", bold=True)}: {rule.description}
 {click.style("Line", bold=True)}:
 {line}
-{example}{instead}""").lstrip())
+{example}{instead}"""
+                ).lstrip()
+            )
         else:
             click.echo(f"{path}:{lineno}\t{rule.name}: {rule.description}")
 

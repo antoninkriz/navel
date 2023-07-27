@@ -25,10 +25,16 @@ class Rule:
 
     def match_path(self, path: pathlib.Path) -> bool:
         should_be_included = any(
-            fnmatch.fnmatch(str(path), included_pattern.glob if isinstance(included_pattern, GlobExpr) else included_pattern) for included_pattern in self.settings.included
+            fnmatch.fnmatch(
+                str(path), str(included_pattern.glob if isinstance(included_pattern, GlobExpr) else included_pattern)
+            )
+            for included_pattern in self.settings.included
         )
         should_be_excluded = any(
-            fnmatch.fnmatch(str(path), excluded_pattern.glob if isinstance(excluded_pattern, GlobExpr) else excluded_pattern) for excluded_pattern in self.settings.excluded
+            fnmatch.fnmatch(
+                str(path), str(excluded_pattern.glob if isinstance(excluded_pattern, GlobExpr) else excluded_pattern)
+            )
+            for excluded_pattern in self.settings.excluded
         )
         return should_be_included and not should_be_excluded
 

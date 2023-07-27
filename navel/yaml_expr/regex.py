@@ -31,7 +31,7 @@ class RegExExpr(YamlExpr):
             raise ExprError("Invalid RegEx") from exc
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__} {self._regex}>'
+        return f"<{self.__class__.__name__} {self._regex}>"
 
     def match_line_numbers(self, file: File) -> List[int]:
         matched_line_numbers = [match.start() for match in re.finditer("\n", file.content_str)]

@@ -17,7 +17,7 @@ class YamlExpr(abc.ABC):
 
     @abc.abstractmethod
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__}>'
+        return f"<{self.__class__.__name__}>"
 
     @classmethod
     def add_to_yaml(cls) -> None:

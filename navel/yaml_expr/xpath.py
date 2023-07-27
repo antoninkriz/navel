@@ -41,7 +41,7 @@ class XPathExpr(YamlExpr):
             raise ExprError("Invalid XPath") from exc
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__} {self._path}>'
+        return f"<{self.__class__.__name__} {self._path}>"
 
     def match_line_numbers(self, file: File) -> List[int]:
         matching_elements = self._path(file.xml)
