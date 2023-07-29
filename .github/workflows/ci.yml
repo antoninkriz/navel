@@ -19,7 +19,7 @@ jobs:
       matrix:
         python-version: ["3.8.17", "3.9.17", "3.10.12", "3.11.4"]
         poetry-version: ["1.5.1"]
-      fail-fast: false
+      fail-fast: true
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -30,25 +30,93 @@ jobs:
           python-version: ${{ matrix.python-version }}
           poetry-version: ${{ matrix.poetry-version }}
 
-      - name: Black - code formatting
+  code_format:
+    runs-on: ubuntu-22.04
+    needs: build
+    strategy:
+      matrix:
+        python-version: ["3.8.17", "3.9.17", "3.10.12", "3.11.4"]
+        poetry-version: ["1.5.1"]
+      fail-fast: true
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          python-version: ${{ matrix.python-version }}
+          poetry-version: ${{ matrix.poetry-version }}
+
+      - name: Black
         shell: bash
         run: poetry run black --check ./navel ./tests
 
-      - name: isort - code formatting
+      - name: isort
         shell: bash
         run: poetry run isort --check ./navel ./tests
+
+  type_check:
+    runs-on: ubuntu-22.04
+    needs: build
+    strategy:
+      matrix:
+        python-version: ["3.8.17", "3.9.17", "3.10.12", "3.11.4"]
+        poetry-version: ["1.5.1"]
+      fail-fast: true
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          python-version: ${{ matrix.python-version }}
+          poetry-version: ${{ matrix.poetry-version }}
 
       - name: Mypy - type checking
         shell: bash
         run: poetry run mypy ./navel
 
+  lint:
+    runs-on: ubuntu-22.04
+    needs: build
+    strategy:
+      matrix:
+        python-version: ["3.8.17", "3.9.17", "3.10.12", "3.11.4"]
+        poetry-version: ["1.5.1"]
+      fail-fast: true
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          python-version: ${{ matrix.python-version }}
+          poetry-version: ${{ matrix.poetry-version }}
+
       - name: PyLint - linter
         shell: bash
         run: poetry run pylint ./navel
 
-      - name: PyTest
-        shell: bash
-        run: poetry run pytest ./tests
+  run:
+    runs-on: ubuntu-22.04
+    needs: build
+    strategy:
+      matrix:
+        python-version: ["3.8.17", "3.9.17", "3.10.12", "3.11.4"]
+        poetry-version: ["1.5.1"]
+      fail-fast: true
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          python-version: ${{ matrix.python-version }}
+          poetry-version: ${{ matrix.poetry-version }}
 
       - name: Navel
         shell: bash
