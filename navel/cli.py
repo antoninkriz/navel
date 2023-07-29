@@ -1,3 +1,7 @@
+"""
+CLI module
+"""
+
 import os
 import pathlib
 import subprocess
@@ -11,16 +15,23 @@ from navel.caching.file_manager import FileManager
 from navel.errors import NavelError
 from navel.initialization import generate_config
 from navel.linter import Linter
-from navel.models import LintingFailure, Rule
+from navel.models import LintingViolation, Rule
 from navel.parsing import load_config_file
 
 
 @click.group()
 def cli() -> None:
-    pass
+    """
+    Group of all CLI commands
+    """
 
 
 def walk_python_files(root_dir: pathlib.Path) -> Iterable[pathlib.Path]:
+    """
+    Get all Python files in a directory and it's subdirectories
+    @param root_dir:
+    @return:
+    """
     return (
         pathlib.Path(os.path.join(root, file_name))
         for root, _, file_names in os.walk(root_dir)
@@ -30,6 +41,11 @@ def walk_python_files(root_dir: pathlib.Path) -> Iterable[pathlib.Path]:
 
 
 def get_git_modified(project_directory: pathlib.Path) -> Iterable[pathlib.Path]:
+    """
+    Get list of modified files in a directory based on GIT
+    @param project_directory: Directory path to be checked for modified files
+    @return: List of paths with modified files
+    """
     default_branch = (
         subprocess.run(
             ["git", "symbolic-ref", "refs/remotes/origin/HEAD"],
@@ -56,8 +72,13 @@ def get_git_modified(project_directory: pathlib.Path) -> Iterable[pathlib.Path]:
     )
 
 
-def linting_failures(filepaths: List[pathlib.Path], rules: List[Rule]) -> Generator[LintingFailure, None, None]:
-    """Given a set of filepaths and a set of rules, yield all rule violations."""
+def rules_violations(filepaths: List[pathlib.Path], rules: List[Rule]) -> Generator[LintingViolation, None, None]:
+    """
+    Yield all violations of rules provided
+    @param filepaths: List of files to lint
+    @param rules: List of rules to lint by
+    @return: Generator with all violations of provided rules
+    """
     failures = 0
 
     file_manager = FileManager()
@@ -72,7 +93,7 @@ def linting_failures(filepaths: List[pathlib.Path], rules: List[Rule]) -> Genera
         for failure in linting_results:
             failures += 1
             lines = file_contents.splitlines()
-            yield LintingFailure(
+            yield LintingViolation(
                 path=filepath,
                 lineno=failure[1],
                 line=lines[min(failure[1], len(lines)) - 1] if lines else "",
@@ -107,6 +128,12 @@ def linting_failures(filepaths: List[pathlib.Path], rules: List[Rule]) -> Genera
     default=False,
 )
 def init(project_directory: pathlib.Path, force: bool, bellybutton: bool) -> None:
+    """
+    Init config files for Navel
+    @param project_directory: Path to the project directory to init
+    @param force: Force init even when config file already exists
+    @param bellybutton: Init as a bellybutton config file instead of Navel
+    """
     config_file_bellybutton = project_directory / ".bellybutton.yml"
     config_file_navel = project_directory / ".navel.yml"
 
@@ -163,6 +190,14 @@ def lint(
     verbose: bool,
     files: Tuple[str],
 ) -> None:
+    """
+    Lint files in a project directory
+    @param project_directory: Path of the project to lint
+    @param modified_only: Check only modified files based on GIT
+    @param verbose: Enable verbose output
+    @param files: List of files to lint. Lints all files in the project directory when empty.
+    """
+
     config_file_bellybutton = project_directory / ".bellybutton.yml"
     config_file_navel = project_directory / ".navel.yml"
 
@@ -186,7 +221,7 @@ def lint(
     )
 
     failures = 0
-    for failure in linting_failures(filepaths, rules):
+    for failure in rules_violations(filepaths, rules):
         failures += 1
         path = os.path.relpath(failure.path, project_directory)
         lineno = failure.lineno

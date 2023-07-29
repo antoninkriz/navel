@@ -1,3 +1,7 @@
+"""
+Module for the custom Glob Yaml Expression
+"""
+
 import os
 import pathlib
 import re
@@ -42,4 +46,8 @@ class GlobExpr(YamlExpr):
 
     @property
     def glob(self) -> pathlib.Path:
+        """
+        Get the glob as a path
+        @return: Glob as a path
+        """
         return self._glob

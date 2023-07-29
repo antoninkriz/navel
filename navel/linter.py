@@ -1,3 +1,7 @@
+"""
+Module with the Linter class
+"""
+
 import pathlib
 import re
 import tokenize
@@ -15,12 +19,21 @@ IGNORE_COMMENTS = [
 
 
 class Linter:
+    """
+    Class handling all linting operations
+    """
+
     def __init__(self, file_manager: FileManager, rules: List[Rule]):
         self._file_manager: FileManager = file_manager
         self._rules: List[Rule] = rules
 
     @staticmethod
     def _get_ignored_lines(file: File) -> FrozenSet[int]:
+        """
+        Get set of all ignored line numbers
+        @param file: File object to get ignored lines form
+        @return: Set of all line numbers of ignored lines
+        """
         return frozenset(
             line
             for token_type, token, (line, _), _, _ in file.tokens
@@ -29,6 +42,11 @@ class Linter:
         )
 
     def lint_file(self, path: pathlib.Path) -> Generator[Tuple[Rule, int], None, None]:
+        """
+        Lint a file
+        @param path: Path to the file to be linted
+        @return: Generator of [Rule, line number] tuples where a Rule matches the line (a Rule is violated)
+        """
         matching_rules = [rule for rule in self._rules if rule.match_path(path)]
         if len(matching_rules) == 0:
             return

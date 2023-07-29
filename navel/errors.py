@@ -1,14 +1,27 @@
+"""
+Custom errors module
+"""
+
+
 class NavelError(Exception):
-    pass
+    """
+    General Navel error
+    """
 
 
 class ParsingError(NavelError):
-    pass
+    """
+    Error when parsing Navel config
+    """
 
 
 class LinterError(NavelError):
-    pass
+    """
+    Error when linting a file
+    """
 
 
 class ExprError(NavelError):
-    pass
+    """
+    Error when an expression is not a valid expression
+    """

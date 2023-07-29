@@ -9,6 +9,10 @@ homepage = "https://github.com/antoninkriz/navel"
 repository = "https://github.com/antoninkriz/navel"
 
 
+[tool.poetry.scripts]
+navel = "navel.__main__:__main__"
+
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

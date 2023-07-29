@@ -1,3 +1,7 @@
+"""
+Module for generating initial Navel config
+"""
+
 import pathlib
 from typing import Iterable
 
@@ -39,6 +43,11 @@ TESTS_SETTINGS_TEMPLATE = """
 
 
 def generate_config(test_directories: Iterable[pathlib.Path]) -> str:
+    """
+    Generate Navel config file contents
+    @param test_directories: Iterable of directories containing test files
+    @return: Navel config
+    """
     test_dirs_block = "\n      ".join(f'- ~+/{test_dir / "*"}' for test_dir in test_directories)
     if test_dirs_block:
         test_settings = TESTS_SETTINGS_TEMPLATE.format(test_dirs=test_dirs_block)

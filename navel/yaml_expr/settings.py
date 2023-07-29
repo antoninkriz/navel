@@ -1,3 +1,7 @@
+"""
+Module for the custom Settings Yaml Expression
+"""
+
 import dataclasses
 from typing import Any, Dict, NoReturn, cast
 
@@ -42,4 +46,8 @@ class SettingsExpr(YamlExpr):
 
     @property
     def settings(self) -> SettingsModel:
+        """
+        Get the SettingsModel stored in this expression
+        @return: SettingsModel class of this expression
+        """
         return self._settings

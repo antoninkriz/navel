@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        python-version: ["3.11.4"]
+        python-version: ["3.8.17", "3.9.17", "3.10.12", "3.11.4"]
         poetry-version: ["1.5.1"]
       fail-fast: false
     steps:
@@ -32,12 +32,24 @@ jobs:
 
       - name: Black - code formatting
         shell: bash
-        run: poetry run black --check navel tests
+        run: poetry run black --check ./navel ./tests
+
+      - name: isort - code formatting
+        shell: bash
+        run: poetry run isort --check ./navel ./tests
 
       - name: Mypy - type checking
         shell: bash
-        run: poetry run mypy navel
+        run: poetry run mypy ./navel
 
       - name: PyLint - linter
         shell: bash
-        run: poetry run pylint navel
+        run: poetry run pylint ./navel
+
+      - name: PyTest
+        shell: bash
+        run: poetry run pytest ./tests
+
+      - name: Navel
+        shell: bash
+        run: poetry run navel lint

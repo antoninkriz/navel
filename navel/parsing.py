@@ -1,3 +1,7 @@
+"""
+Module related to all parsing operations
+"""
+
 import ast
 import pathlib
 from typing import Any, Dict, List, Optional, TextIO
@@ -20,6 +24,11 @@ XPathExpr.add_to_yaml()
 
 
 def validate_syntax(rule_clause: str) -> bool:
+    """
+    Check if a string is a syntactically valid Python code
+    @param rule_clause: String to be checked
+    @return: True when the string is valid Python code, False otherwise
+    """
     try:
         ast.parse(rule_clause)
         return True
@@ -28,6 +37,12 @@ def validate_syntax(rule_clause: str) -> bool:
 
 
 def matches_expr(yaml_expr: YamlExpr, expr: str) -> bool:
+    """
+    Check if a string matches a Yaml Expression class
+    @param yaml_expr: YamlExpr class to check for
+    @param expr: String expression to be checked
+    @return: True when class matches the expression, False otherwise
+    """
     return yaml_expr.matches(File(expr.encode("utf-8"), "<settings>"))
 
 
@@ -36,6 +51,13 @@ def parse_rule(
     rule_values: Dict[str, Any],
     default_settings: Optional[SettingsExpr] = None,
 ) -> Rule:
+    """
+    Parse and check provided values and create a Rule class instance from these
+    @param rule_name: Name of the rule
+    @param rule_values: Values to parse and instantiate the Rule class with
+    @param default_settings: Default settings in case of no Rule-specific settings provided
+    @return: Instance of the Rule class
+    """
     description = rule_values.get("description")
     if description is None:
         raise ParsingError(f'Rule "{rule_name}": missing `description`')
@@ -77,6 +99,11 @@ def parse_rule(
 
 
 def load_config(stream: TextIO) -> List[Rule]:
+    """
+    Load config from TextIO stream in the form of a list of rules
+    @param stream: Text stream to parse
+    @return: List of rules
+    """
     yml = yaml.load(stream, Loader=yaml.FullLoader)
     default_settings = yml.get("default_settings")
     if default_settings is not None and not isinstance(default_settings, SettingsExpr):
@@ -88,4 +115,9 @@ def load_config(stream: TextIO) -> List[Rule]:
 
 
 def load_config_file(path: pathlib.Path) -> List[Rule]:
+    """
+    Load config from TextIO stream in the form of a list of rules
+    @param path: File to read the config from
+    @return: List of rules
+    """
     return load_config(path.open("r"))

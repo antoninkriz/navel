@@ -1,4 +1,9 @@
+"""
+Module handling files and their caching
+"""
+
 import ast
+import dataclasses
 import pathlib
 import tokenize
 from typing import Dict, List
@@ -8,7 +13,12 @@ import pyastgrep.asts
 import pyastgrep.files
 
 
+@dataclasses.dataclass
 class File:
+    """
+    Class caching opened and parsed file
+    """
+
     def __init__(self, file_bin: bytes, file_name: str):
         file_str, file_ast = pyastgrep.files.parse_python_file(file_bin, file_name, auto_dedent=False)
         ast_xml_mapping: Dict[lxml.etree._Element, ast.AST] = {}
@@ -25,10 +35,19 @@ class File:
 
 
 class FileManager:
+    """
+    Class caching all files that have been read and parsed
+    """
+
     def __init__(self) -> None:
-        self._files: dict[pathlib.Path, File] = {}
+        self._files: Dict[pathlib.Path, File] = {}
 
     def get(self, path: pathlib.Path) -> File:
+        """
+        Get File object from the cache or read it if not present
+        @param path: Path to the file
+        @return: Cached file object
+        """
         try:
             return self._files[path]
         except KeyError:

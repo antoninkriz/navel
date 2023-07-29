@@ -1,3 +1,7 @@
+"""
+Data models module
+"""
+
 import dataclasses
 import fnmatch
 import pathlib
@@ -9,6 +13,10 @@ from navel.yaml_expr.yaml_expr import YamlExpr
 
 @dataclasses.dataclass
 class Settings:
+    """
+    Parsed settings form config
+    """
+
     included: List[Union[str, GlobExpr]]
     excluded: List[Union[str, GlobExpr]]
     allow_ignore: bool
@@ -16,6 +24,10 @@ class Settings:
 
 @dataclasses.dataclass
 class Rule:
+    """
+    Parsed rule from config
+    """
+
     name: str
     description: str
     expr: YamlExpr
@@ -24,6 +36,11 @@ class Rule:
     settings: Settings
 
     def match_path(self, path: pathlib.Path) -> bool:
+        """
+        Check if path matches the rule
+        @param path: Path to be checked
+        @return: True on match, False otherwise
+        """
         should_be_included = any(
             fnmatch.fnmatch(
                 str(path), str(included_pattern.glob if isinstance(included_pattern, GlobExpr) else included_pattern)
@@ -40,7 +57,11 @@ class Rule:
 
 
 @dataclasses.dataclass
-class LintingFailure:
+class LintingViolation:
+    """
+    Linting violation data class
+    """
+
     path: pathlib.Path
     lineno: int
     line: str

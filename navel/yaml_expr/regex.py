@@ -1,3 +1,7 @@
+"""
+Module for the custom RegExp Yaml Expression
+"""
+
 import bisect
 import re
 from typing import List
